@@ -1,0 +1,33 @@
+groups:
+  - name: n8n-alerts
+    rules:
+      - alert: N8nHighErrorRate
+        expr: |
+          sum(rate(n8n_workflow_failed_total[5m]))
+          /
+          sum(rate(n8n_workflow_success_total[5m])) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High n8n workflow error rate"
+          description: "More than 5% of workflows failing over last 10m."
+
+      - alert: N8nQueueBacklog
+        expr: n8n_jobs_waiting > 100
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "n8n queue backlog"
+          description: "More than 100 jobs waiting; workers might be overloaded."
+
+      - alert: N8nMemoryUsageHigh
+        expr: |
+          (nodejs_heap_space_size_used_bytes / nodejs_heap_space_size_total_bytes) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "n8n Node.js heap usage high"
+          description: "Heap usage > 80% for 10m; possible memory leak."
